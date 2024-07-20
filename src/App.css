@@ -26,10 +26,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #fff; /* White background for the search bar */
+  background-color: #fff;
   padding: 10px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for a nice effect */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .search-bar input {
@@ -68,7 +68,7 @@
   justify-content: space-around;
   width: 100%;
   max-width: 600px;
-  margin-top: 20px; /* Space between description and weather data */
+  margin-top: 20px;
 }
 
 .col {
@@ -78,13 +78,13 @@
   background-color: #2f4680;
   padding: 10px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for a nice effect */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .col img {
   width: 40px;
   height: 40px;
-  margin-bottom: 10px; /* Space between icon and text */
+  margin-bottom: 10px;
 }
 
 .col p {
@@ -94,5 +94,5 @@
 
 .col span {
   font-size: 14px;
-  color: #555; /* Slightly lighter color for description */
+  color: #555;
 }
