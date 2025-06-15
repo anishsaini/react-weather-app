@@ -11,8 +11,8 @@ import { useState } from "react";
 import { useRef } from "react";
 
 const Weatherapp = () => {
-  const [weather, setWeather] = useState(false);
-
+  const [weather, setWeather] = useState(null);
+  const [error, setError] = useState(null);
   const inputRef = useRef(null);
 
   const allIcons = {
@@ -37,12 +37,22 @@ const Weatherapp = () => {
   };
 
   const search = async (city) => {
+    if (!city) return;
+    
     try {
-      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${
-        import.meta.env.VITE_APP_ID
-      }`;
+      setError(null);
+      const apiKey = import.meta.env.VITE_APP_ID;
+      console.log('API Key:', apiKey);
+      
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+      console.log('API URL:', url);
+      
       const response = await fetch(url);
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch weather data');
+      }
 
       console.log(data);
 
@@ -52,11 +62,22 @@ const Weatherapp = () => {
         humidity: data.main.humidity,
         windSpeed: data.wind.speed,
         temprature: Math.floor(data.main.temp),
+        feelsLike: Math.floor(data.main.feels_like),
         location: data.name,
         icon: icon,
+        description: data.weather[0].description,
+        pressure: data.main.pressure,
+        visibility: (data.visibility / 1000).toFixed(1), // Convert to km
+        maxTemp: Math.floor(data.main.temp_max),
+        minTemp: Math.floor(data.main.temp_min),
+        country: data.sys.country,
+        sunrise: new Date(data.sys.sunrise * 1000).toLocaleTimeString(),
+        sunset: new Date(data.sys.sunset * 1000).toLocaleTimeString(),
       });
     } catch (error) {
       console.error("Error fetching weather data:", error);
+      setError(error.message);
+      setWeather(null);
     }
   };
 
@@ -64,36 +85,114 @@ const Weatherapp = () => {
     search("london");
   }, []);
 
+  const handleSearch = () => {
+    const city = inputRef.current.value.trim();
+    if (city) {
+      search(city);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   return (
     <div className="Weather">
       <div className="search-bar">
-        <input ref={inputRef} type="text" placeholder="Enter city name" />
+        <input 
+          ref={inputRef} 
+          type="text" 
+          placeholder="Enter city name" 
+          onKeyPress={handleKeyPress}
+        />
         <img
           src={search_icon}
           alt=""
-          onClick={() => search(inputRef.current.value)}
+          onClick={handleSearch}
         />
       </div>
 
-      <img src={clear_icon} alt="" className="weather-icon" />
-      <p className="temperature">{weather.temprature}°C</p>
-      <p className="location">{weather.location}</p>
-      <div className="weather_data">
-        <div className="col">
-          <img src={humidity_icon} alt="" />
-          <div>
-            <p>{weather.humidity}%</p>
-            <span>Humidity</span>
+      {error && <p className="error-message">{error}</p>}
+      
+      {weather && (
+        <>
+          <div className="weather-main">
+            <img src={weather.icon} alt="" className="weather-icon" />
+            <div className="temperature-container">
+              <p className="temperature">{weather.temprature}°C</p>
+              <p className="feels-like">Feels like: {weather.feelsLike}°C</p>
+            </div>
+            <p className="location">{weather.location}, {weather.country}</p>
+            <p className="description">{weather.description}</p>
           </div>
-        </div>
-        <div className="col">
-          <img src={wind_icon} alt="" />
-          <div>
-            <p>{weather.windSpeed}km/h</p>
-            <span>Wind speed</span>
+
+          <div className="weather-details">
+            <div className="detail-row">
+              <div className="col">
+                <img src={humidity_icon} alt="" />
+                <div>
+                  <p>{weather.humidity}%</p>
+                  <span>Humidity</span>
+                </div>
+              </div>
+              <div className="col">
+                <img src={wind_icon} alt="" />
+                <div>
+                  <p>{weather.windSpeed} km/h</p>
+                  <span>Wind speed</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="detail-row">
+              <div className="col">
+                <div>
+                  <p>{weather.pressure} hPa</p>
+                  <span>Pressure</span>
+                </div>
+              </div>
+              <div className="col">
+                <div>
+                  <p>{weather.visibility} km</p>
+                  <span>Visibility</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="detail-row">
+              <div className="col">
+                <div>
+                  <p>{weather.maxTemp}°C</p>
+                  <span>Max Temp</span>
+                </div>
+              </div>
+              <div className="col">
+                <div>
+                  <p>{weather.minTemp}°C</p>
+                  <span>Min Temp</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="detail-row">
+              <div className="col">
+                <div>
+                  <p>{weather.sunrise}</p>
+                  <span>Sunrise</span>
+                </div>
+              </div>
+              <div className="col">
+                <div>
+                  <p>{weather.sunset}</p>
+                  <span>Sunset</span>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };
